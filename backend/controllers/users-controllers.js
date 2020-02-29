@@ -52,15 +52,9 @@ const signup = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const existingUser = await User.findOne({ email: email });
-    if (!existingUser || existingUser.password !== password)
-      return next(
-        new HttpError("Invalid credentials, could not log you in.", 401)
-      );
+    const existingUser = await User.findBuCredantials(email, password);
   } catch (error) {
-    return next(
-      new HttpError("Logged in  failed, please try again later.", 500)
-    );
+    return next(error);
   }
 
   res.json({ message: "Logged in!" });
