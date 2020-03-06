@@ -1,31 +1,15 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
 const placesRoute = require("./routes/places-route");
 const usersRoute = require("./routes/users-route");
 const HttpError = require("./model/http-error");
-// const connectDB = require("./config/db");
+const connectDB = require("./config/db");
 const app = express();
 const port = process.env.PORT || 5000;
 // connect the database
-const db = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0-m2y4d.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-
-const connectDB = async () => {
-  try {
-    await mongoose.connect(db, {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-      useUnifiedTopology: true
-    });
-    console.log("mongoDB Connected");
-  } catch (error) {
-    console.error(error);
-    process.exit(1);
-  }
-};
+connectDB();
 
 app.use(bodyParser.json());
 
@@ -67,6 +51,5 @@ app.use((error, req, res, next) => {
 });
 // Connect the express server
 app.listen(port, () => {
-  connectDB();
   console.log(`Server running on port ${port}`);
 });
