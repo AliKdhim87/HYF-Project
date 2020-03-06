@@ -1,9 +1,0 @@
-{
-  "env": {
-    "DB_USER": "test",
-    "DB_PASSWORD": "Aaa12345",
-    "DB_NAME": "mern",
-    "MAPBOX_API_KEY": "pk.eyJ1IjoiYWxpa2FkaGltIiwiYSI6ImNrNnVqZmY2YTA1bnQzZW9hOGl5c3owd3gifQ.0nam2ATvhX9r9KW4G36mSg",
-    "JWT_KEY": "secret"
-  }
-}

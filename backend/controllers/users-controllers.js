@@ -2,7 +2,8 @@ const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const HttpError = require("../model/http-error");
 const User = require("../model/user");
-
+const config = require("config");
+const jwtKey = config.get("JWT_KEY");
 const getUsers = async (req, res, next) => {
   let users;
   try {
@@ -52,7 +53,7 @@ const signup = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: createdUser.id, email: createdUser.email, token },
-      process.env.JWT_KEY,
+      jwtKey,
       { expiresIn: "1h" }
     );
   } catch (error) {
@@ -78,7 +79,7 @@ const login = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: existingUser.id, email: existingUser.email, token },
-      process.env.JWT_KEY,
+      jwtKey,
       { expiresIn: "1h" }
     );
   } catch (error) {
