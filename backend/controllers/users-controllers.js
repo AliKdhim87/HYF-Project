@@ -1,4 +1,5 @@
 const { validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
 const HttpError = require("../model/http-error");
 const User = require("../model/user");
 
@@ -24,40 +25,68 @@ const signup = async (req, res, next) => {
       new Error("Invalid input passed, please check your data.", 422)
     );
   const { name, email, password } = req.body;
+  let createdUser;
   try {
     const existingUser = await User.findOne({ email: email });
 
     if (existingUser)
       return next(
-        new HttpError("User exists already, please login instead.", 500)
+        new HttpError("User exists already, please login instead.", 422)
       );
 
-    const createdUser = new User({
+    createdUser = new User({
       name,
       email,
-      image: "https://i.picsum.photos/id/1070/200/300.jpg",
+      image: req.file.path,
       password,
       places: []
     });
 
     await createdUser.save();
-    res.status(201).json({ user: createdUser.toObject({ getters: true }) });
   } catch (error) {
     return next(
       new HttpError("Signin up  failed, please try again later.", 500)
     );
   }
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: createdUser.id, email: createdUser.email, token },
+      process.env.JWT_KEY,
+      { expiresIn: "1h" }
+    );
+  } catch (error) {
+    return next(
+      new HttpError("Signing up failed, please try agein later", 500)
+    );
+  }
+  res
+    .status(201)
+    .json({ userId: createdUser.id, email: createdUser.email, token });
 };
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
+  let existingUser;
   try {
-    const existingUser = await User.findBuCredantials(email, password);
+    existingUser = await User.findBuCredantials(email, password);
   } catch (error) {
     return next(error);
   }
 
-  res.json({ message: "Logged in!" });
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: existingUser.id, email: existingUser.email, token },
+      process.env.JWT_KEY,
+      { expiresIn: "1h" }
+    );
+  } catch (error) {
+    return next(new HttpError("Loggin in failed, please try agein later", 500));
+  }
+  res
+    .status(201)
+    .json({ userId: existingUser.id, email: existingUser.email, token });
 };
 
 module.exports = { getUsers, signup, login };

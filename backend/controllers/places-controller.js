@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const fs = require("fs");
 const HttpError = require("../model/http-error");
 const { validationResult } = require("express-validator");
 const getCoordsForAddress = require("../util/location");
@@ -55,15 +56,15 @@ const createPlace = async (req, res, next) => {
       new Error("Invalid input passed, please check your data.", 422)
     );
 
-  const { title, description, address, creator } = req.body;
+  const { title, description, address } = req.body;
   // Here I change the coordinatis to object and also reverse the lng becaouse I useed the mapbox  geocode by default it geve us an array [lat, lng].
   let changeCoordinates;
   let coordinates;
   try {
     changeCoordinates = await getCoordsForAddress(address);
     coordinates = {
-      lng: changeCoordinates[1],
-      lat: changeCoordinates[0]
+      lat: changeCoordinates[1],
+      lng: changeCoordinates[0]
     };
   } catch (error) {
     return next(error);
@@ -74,13 +75,13 @@ const createPlace = async (req, res, next) => {
     description,
     address,
     location: coordinates,
-    image: "https://i.picsum.photos/id/500/500/500.jpg",
-    creator
+    image: req.file.path,
+    creator: req.userData.userId
   });
 
   let user;
   try {
-    user = await User.findById(creator);
+    user = await User.findById(req.userData.userId);
   } catch (error) {
     return next(new HttpError("Creating place failed, please try agen", 500));
   }
@@ -120,6 +121,11 @@ const updatePlaceById = async (req, res, next) => {
       return next(
         new HttpError("Could not find a place for the provided  id.", 404)
       );
+    if (place.creator.toString() !== req.userData.userId) {
+      return next(
+        new HttpError("You are not allowed to edit this place.", 401)
+      );
+    }
 
     place.title = title;
     place.description = description;
@@ -146,6 +152,13 @@ const deletePlaceById = async (req, res, next) => {
   if (!place)
     return next(new HttpError("Could not find a place for the id.", 404));
 
+  if (place.creator.id !== req.userData.userId) {
+    return next(
+      new HttpError("You are not allowed to delete this place.", 403)
+    );
+  }
+
+  let imagePath = place.image;
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -158,6 +171,9 @@ const deletePlaceById = async (req, res, next) => {
       new HttpError("Something went wrong, could not delete place.", 500)
     );
   }
+  fs.unlink(imagePath, error => {
+    console.log(error);
+  });
 
   res.status(200).json({ message: "Place deleted" });
 };

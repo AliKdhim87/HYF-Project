@@ -1,7 +1,6 @@
 const axios = require("axios");
 const HttpError = require("../model/http-error");
-const API_KEY =
-  "pk.eyJ1IjoiYWxpa2FkaGltIiwiYSI6ImNrNnVqZmY2YTA1bnQzZW9hOGl5c3owd3gifQ.0nam2ATvhX9r9KW4G36mSg";
+const API_KEY = process.env.MAPBOX_API_KEY;
 
 async function getCoordsForAddress(address) {
   const res = await axios.get(
