@@ -1,5 +1,5 @@
 {
-  "mongoURI": "mongodb+srv://test:Aaa12345@cluster0-m2y4d.mongodb.net/mern?retryWrites=true&w=majority",
-  "MAPBOX_API_KEY": "pk.eyJ1IjoiYWxpa2FkaGltIiwiYSI6ImNrNnVqZmY2YTA1bnQzZW9hOGl5c3owd3gifQ.0nam2ATvhX9r9KW4G36mSg",
-  "JWT_KEY": "secret"
+  "mongoURI": "",
+  "MAPBOX_API_KEY": "",
+  "JWT_KEY": ""
 }
