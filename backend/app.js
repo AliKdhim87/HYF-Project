@@ -14,6 +14,7 @@ connectDB();
 app.use(bodyParser.json());
 
 app.use("/uploads/images", express.static(path.join("uploads", "images")));
+app.use(express.static(path.join("public")));
 
 // app.use((req, res, next) => {
 //   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -29,19 +30,17 @@ app.use("/uploads/images", express.static(path.join("uploads", "images")));
 app.use("/api/places", placesRoute);
 app.use("/api/users", usersRoute);
 
+app.use((req, res, next) => {
+  res.sendFile(path.resolve(__dirname, "public", "index.html"));
+});
+
 // Here I check if the user use a wrong path
 // app.use((req, res, next) => {
 //   const error = new HttpError("Could not find this route.", 404);
 
 //   throw error;
 // });
-if (process.env.NODE_ENV === "production") {
-  // Set static folder
-  app.use(express.static("frontend/build"));
-  app.get("*", (req, res) =>
-    res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"))
-  );
-}
+
 // Custom error handling
 app.use((error, req, res, next) => {
   if (req.file) {
