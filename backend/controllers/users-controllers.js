@@ -4,8 +4,10 @@ const HttpError = require("../model/http-error");
 const User = require("../model/user");
 const config = require("config");
 const jwtKey = config.get("JWT_KEY");
+
 const getUsers = async (req, res, next) => {
   let users;
+
   try {
     users = await User.find({}, "-password");
   } catch (error) {
