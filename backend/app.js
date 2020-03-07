@@ -14,32 +14,27 @@ connectDB();
 app.use(bodyParser.json());
 
 app.use("/uploads/images", express.static(path.join("uploads", "images")));
-app.use(express.static(path.join("public")));
 
-// app.use((req, res, next) => {
-//   res.setHeader("Access-Control-Allow-Origin", "*");
-//   res.setHeader(
-//     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-//   );
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
 
-//   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
-//   next();
-// });
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+  next();
+});
 
 app.use("/api/places", placesRoute);
 app.use("/api/users", usersRoute);
 
-app.use((req, res, next) => {
-  res.sendFile(path.resolve(__dirname, "public", "index.html"));
-});
-
 // Here I check if the user use a wrong path
-// app.use((req, res, next) => {
-//   const error = new HttpError("Could not find this route.", 404);
+app.use((req, res, next) => {
+  const error = new HttpError("Could not find this route.", 404);
 
-//   throw error;
-// });
+  throw error;
+});
 
 // Custom error handling
 app.use((error, req, res, next) => {
