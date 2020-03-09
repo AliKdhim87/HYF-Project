@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "author": "",
+  "author": "Ali",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
