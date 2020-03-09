@@ -4,6 +4,7 @@ const HttpError = require("../model/http-error");
 const User = require("../model/user");
 const config = require("config");
 const jwtKey = config.get("JWT_KEY");
+var cloudinary = require("../uploads/cloudinary");
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -36,11 +37,13 @@ const signup = async (req, res, next) => {
       return next(
         new HttpError("User exists already, please login instead.", 422)
       );
+    // upload the image first to the cloudinary than I saved the image url on mongodb
+    const result = await cloudinary.uploader.upload(req.file.path);
 
     createdUser = new User({
       name,
       email,
-      image: req.file.path,
+      image: result.url,
       password,
       places: []
     });

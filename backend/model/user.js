@@ -23,9 +23,7 @@ const userSchema = new Schema({
     minlength: 6
   },
   image: {
-    type: String,
-    required: true,
-    trim: true
+    type: String
   },
   places: [
     {

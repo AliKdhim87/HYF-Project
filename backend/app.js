@@ -13,7 +13,6 @@ connectDB();
 
 app.use(bodyParser.json());
 
-app.use("/uploads/images", express.static(path.join("uploads", "images")));
 app.use(express.static(path.join("public")));
 
 app.use((req, res, next) => {
@@ -42,11 +41,11 @@ app.use((req, res, next) => {
 
 // Custom error handling
 app.use((error, req, res, next) => {
-  if (req.file) {
-    fs.unlink(req.file.path, error => {
-      console.log(error);
-    });
-  }
+  // if (req.file) {
+  //   fs.unlink(req.file.path, error => {
+  //     console.log(error);
+  //   });
+  // }
   if (res.headerSent) {
     return next(error);
   }

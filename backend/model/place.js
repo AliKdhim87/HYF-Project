@@ -14,9 +14,15 @@ const placeSchema = new Schema({
     trim: true
   },
   image: {
-    type: String,
-    required: true,
-    trim: true
+    id: {
+      type: String,
+      required: true
+    },
+    imageUrl: {
+      type: String,
+      required: true,
+      trim: true
+    }
   },
   address: {
     type: String,

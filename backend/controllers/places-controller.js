@@ -5,7 +5,7 @@ const { validationResult } = require("express-validator");
 const getCoordsForAddress = require("../util/location");
 const Place = require("../model/place");
 const User = require("../model/user");
-
+const cloudinary = require("../uploads/cloudinary");
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
   try {
@@ -69,13 +69,20 @@ const createPlace = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-
+  // upload the image first to the cloudinary
+  const result = await cloudinary.uploader.upload(req.file.path);
+  // I get the image info from the cloudinary and i storage it on mongodb as a string
+  const { url, public_id } = result;
+  const imageSrc = {
+    imageUrl: url,
+    id: public_id
+  };
   const createdPlace = new Place({
     title,
     description,
     address,
     location: coordinates,
-    image: req.file.path,
+    image: imageSrc,
     creator: req.userData.userId
   });
 
@@ -146,7 +153,9 @@ const deletePlaceById = async (req, res, next) => {
   try {
     place = await Place.findById(placeId).populate("creator");
   } catch (error) {
-    return next(new HttpError("Something went wrong, could not delete place."));
+    return next(
+      new HttpError("Something went wrong, could not delete place.", 500)
+    );
   }
 
   if (!place)
@@ -157,13 +166,18 @@ const deletePlaceById = async (req, res, next) => {
       new HttpError("You are not allowed to delete this place.", 403)
     );
   }
-
-  let imagePath = place.image;
+  // Delete the image first from cloudinary by id
+  const public_id = place.image.id;
+  cloudinary.uploader.destroy(public_id, function(error, result) {
+    if (error)
+      throw new HttpError("Something went wrong, could not delete image.", 500);
+  });
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await place.remove({ session: sess });
     place.creator.places.pull(place);
+
     await place.creator.save({ session: sess });
     await sess.commitTransaction();
   } catch (error) {
@@ -171,9 +185,6 @@ const deletePlaceById = async (req, res, next) => {
       new HttpError("Something went wrong, could not delete place.", 500)
     );
   }
-  fs.unlink(imagePath, error => {
-    console.log(error);
-  });
 
   res.status(200).json({ message: "Place deleted" });
 };
