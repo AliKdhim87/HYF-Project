@@ -50,7 +50,7 @@ const PlaceItem = ({ place, onDeletePlace }) => {
         footer={<Button onClick={closeMapHandler}>Close</Button>}
       >
         <div className='map-container'>
-          <h1>THE MAP!</h1>
+          <h2>THE MAP!</h2>
           <Map center={location} zoom={16} />
         </div>
       </Modal>
@@ -79,10 +79,7 @@ const PlaceItem = ({ place, onDeletePlace }) => {
         <Card className='place-item__content'>
           {isLoading && <LoadingSpinner asOverlay />}
           <div className='place-item__image'>
-            <img
-              src={`${process.env.REACT_APP_ASSET_URL}/${image}`}
-              alt={name}
-            />
+            <img src={image.imageUrl} alt={name} />
           </div>
           <div className='place-item__info'>
             <h2>{title}</h2>

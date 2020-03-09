@@ -1,32 +1,3 @@
-// import React, { useRef, useEffect } from "react";
-// import mapboxgl from "mapbox-gl";
-// mapboxgl.accessToken =
-//   "pk.eyJ1IjoiYWxpa2FkaGltIiwiYSI6ImNqenZ0bDFzdzBhdGozbnBrMDFleDZ3dHQifQ.ak4IhXE5LXp1b3ofQC5l_Q";
-
-// const Map = props => {
-//   const mapRef = useRef();
-
-//   const { center, zoom } = props;
-//   console.log(mapboxgl);
-//   useEffect(() => {
-//     const map = new window.mapboxgl.Map({
-//       container: mapRef.current,
-//       center: center,
-//       style: "mapbox://styles/mapbox/streets-v11",
-//       zoom: zoom
-//     });
-
-//     new window.mapboxgl.Marker({ position: center, map: map });
-//   }, [center, zoom]);
-
-//   return (
-//     <div
-//       ref={mapRef}
-//       className={`map ${props.className}`}
-//       style={props.style}
-//     ></div>
-//   );
-// };
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "./Map.css";
@@ -38,8 +9,7 @@ const Map = props => {
   const { center, zoom } = props;
 
   useEffect(() => {
-    mapboxgl.accessToken =
-      "pk.eyJ1IjoiYWxpa2FkaGltIiwiYSI6ImNrNnVqZmY2YTA1bnQzZW9hOGl5c3owd3gifQ.0nam2ATvhX9r9KW4G36mSg";
+    mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_API_KEY;
     const initializeMap = ({ setMap, mapContainer }) => {
       const map = new mapboxgl.Map({
         container: mapContainer.current,

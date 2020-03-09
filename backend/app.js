@@ -39,7 +39,7 @@ app.use((req, res, next) => {
   throw error;
 });
 
-// Custom error handling
+// Custom error handling /
 app.use((error, req, res, next) => {
   // if (req.file) {
   //   fs.unlink(req.file.path, error => {
