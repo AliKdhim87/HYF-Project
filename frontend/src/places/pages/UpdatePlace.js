@@ -12,7 +12,7 @@ import {
   VALIDATOR_MINLENGTH
 } from "../../shared/Util/validators";
 import { useFrom } from "../../shared/hooks/form-hook";
-
+import "./NewPlace.css";
 const UpdatePlace = () => {
   const auth = useContext(AuthContext);
 
