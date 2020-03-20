@@ -6,7 +6,7 @@ import ErrorModal from "../../shared/component/UIElements/ErrorModal";
 import LoadingSpinner from "../../shared/component/UIElements/LoadingSpinner";
 
 const UserPlaces = () => {
-  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const { error, sendRequest, clearError, isLoading } = useHttpClient();
   const [places, setPlaces] = useState();
   const userId = useParams().userId;
 
@@ -21,11 +21,13 @@ const UserPlaces = () => {
     };
     getPlaces();
   }, [sendRequest, userId]);
+
   const placeDeleteHandler = detetedPlaceId => {
     setPlaces(prevPlaces =>
       prevPlaces.filter(places => places.id !== detetedPlaceId)
     );
   };
+
   return (
     <Fragment>
       <ErrorModal error={error} onClear={clearError} />

@@ -8,6 +8,7 @@ const placessControllers = require("../controllers/places-controller");
 route.get("/:pid", placessControllers.getPlaceById);
 
 route.get("/user/:uid", placessControllers.getPlacesByUserId);
+route.get("/evaluation/:id", placessControllers.placeEvaluation);
 
 route.use(checkAuth);
 route.post(
@@ -35,6 +36,8 @@ route.patch(
   ],
   placessControllers.updatePlaceById
 );
+route.post("/like/:id", placessControllers.likeThePlace);
+route.post("/disLike/:id", placessControllers.disLikeThePlace);
 
-route.delete("/:pid", placessControllers.deletePlaceById);
+route.delete("/like/:pid", placessControllers.deletePlaceById);
 module.exports = route;

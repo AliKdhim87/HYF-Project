@@ -3,6 +3,7 @@ import UsersList from "../components/UsersList";
 import ErrorModal from "../../shared/component/UIElements/ErrorModal";
 import LoadingSpinner from "../../shared/component/UIElements/LoadingSpinner";
 import useHttpClient from "../../shared/hooks/http-hook";
+
 const Users = () => {
   const [users, setUsers] = useState();
   const { isLoading, error, sendRequest, clearError } = useHttpClient();

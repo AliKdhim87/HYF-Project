@@ -6,6 +6,7 @@ import {
   Redirect
 } from "react-router-dom";
 import MainNavigation from "./shared/component/Navigation/MainNavigation";
+
 // import Users from "./users/pages/Users";
 // import NewPlace from "./places/pages/NewPlace";
 // import UserPlaces from "./places/pages/UserPlaces";
@@ -35,6 +36,7 @@ const App = () => {
         <Route path='/places/new' exact>
           <NewPlace />
         </Route>
+
         <Route path='/places/:placeId/'>
           <UpdatePlace />
         </Route>
