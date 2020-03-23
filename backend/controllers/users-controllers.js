@@ -1,5 +1,10 @@
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
+
+const {
+  frogetPasswordEmail,
+  resetPasswordEmail
+} = require("../emails/account");
 const HttpError = require("../model/http-error");
 const User = require("../model/user");
 const config = require("config");
@@ -94,5 +99,70 @@ const login = async (req, res, next) => {
     .status(201)
     .json({ userId: existingUser.id, email: existingUser.email, token });
 };
+// @route POST api/users/recover
+// @desc Recover Password - Generates token and Sends password reset email
+// @access Public
+const forgetPassword = async (req, res, next) => {
+  const email = req.body.email;
 
-module.exports = { getUsers, signup, login };
+  const user = await User.findOne({ email });
+  try {
+    if (!user) {
+      return next(
+        new HttpError(
+          `The email address ${req.body.email} is not associated with any account. Double-check your email address and try again.`,
+          401
+        )
+      );
+    }
+    //Generate and set password reset token
+    user.generatePasswordReset();
+    // Save the updated user object
+    user.save();
+    // send email
+    let link = req.headers.origin + "/resetpassword/" + user.resetPasswordToken;
+
+    frogetPasswordEmail(user.name, user.email, link);
+    res.status(200).json({
+      message: "A reset email has been sent to " + user.email + "."
+    });
+  } catch (error) {
+    return next(new HttpError(error.message, 500));
+  }
+};
+// @route POST api/users/reset
+// @desc Reset Password
+// @access Public
+const restPassword = async (req, res, next) => {
+  const user = await User.findOne({
+    resetPasswordToken: req.params.token,
+    resetPasswordExpires: { $gt: Date.now() }
+  });
+  try {
+    if (!user) {
+      return next(
+        new HttpError("Password reset token is invalid or has expired.", 401)
+      );
+    }
+    if (req.body.password !== req.body.confirmpassword)
+      return next(
+        new HttpError(
+          "The password and confirmation password do not match.",
+          400
+        )
+      );
+
+    //Set the new password
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    // Save
+    user.save();
+    // send email
+    resetPasswordEmail(user.name, user.email);
+    res.status(200).json({ message: "Your password has been updated." });
+  } catch (error) {
+    return next(new HttpError(error.message, 500));
+  }
+};
+module.exports = { getUsers, signup, login, forgetPassword, restPassword };

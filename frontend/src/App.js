@@ -6,7 +6,8 @@ import {
   Redirect
 } from "react-router-dom";
 import MainNavigation from "./shared/component/Navigation/MainNavigation";
-
+import ForgetPassword from "./users/components/ForgetPassword";
+import ResetEmail from "./users/components/ResetEmail";
 // import Users from "./users/pages/Users";
 // import NewPlace from "./places/pages/NewPlace";
 // import UserPlaces from "./places/pages/UserPlaces";
@@ -54,6 +55,12 @@ const App = () => {
         </Route>
         <Route path='/auth'>
           <Auth />
+        </Route>
+        <Route path='/forgetpassword'>
+          <ForgetPassword />
+        </Route>
+        <Route path='/resetpassword/:token'>
+          <ResetEmail />
         </Route>
         <Redirect to='/auth' />
       </Switch>

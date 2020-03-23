@@ -47,3 +47,10 @@
 .user-item__info h3 {
   margin: 0;
 }
+
+.forget_password {
+  width: 90%;
+  max-width: 25rem;
+  margin: 7rem auto;
+  text-align: center;
+}

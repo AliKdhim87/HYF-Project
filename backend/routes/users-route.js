@@ -23,5 +23,10 @@ route.post(
 );
 
 route.post("/login", usersControllers.login);
-
+route.post("/forget", usersControllers.forgetPassword);
+route.post(
+  "/reset/:token",
+  check("password").isLength({ min: 6 }),
+  usersControllers.restPassword
+);
 module.exports = route;
