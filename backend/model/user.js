@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
 const HttpError = require("../model/http-error");
 const uniqueValidator = require("mongoose-unique-validator");
 const Schema = mongoose.Schema;
@@ -23,8 +22,6 @@ const userSchema = new Schema({
     trim: true,
     minlength: 6
   },
-  resetPasswordToken: String, // used for after password reset is submitted
-  resetPasswordExpires: Date,
   image: {
     type: String
   },
@@ -33,6 +30,15 @@ const userSchema = new Schema({
       type: mongoose.Types.ObjectId,
       required: true,
       ref: "Place"
+    }
+  ],
+  bucketList: [
+    {
+      id:{ type: mongoose.Types.ObjectId, required: true, ref: "Place" },
+      _id:false,
+      createdBy: {type:String},
+      isVisited:  {type:Boolean}
+
     }
   ]
 });
@@ -59,10 +65,6 @@ userSchema.pre("save", async function(next) {
 
   next();
 });
-userSchema.methods.generatePasswordReset = function() {
-  this.resetPasswordToken = crypto.randomBytes(20).toString("hex");
-  this.resetPasswordExpires = Date.now() + 3600000; //expires in an hour
-};
 userSchema.plugin(uniqueValidator);
 const User = mongoose.model("User", userSchema);
 

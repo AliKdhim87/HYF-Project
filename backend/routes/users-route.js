@@ -1,7 +1,7 @@
 const express = require("express");
 const { check } = require("express-validator");
 const route = express.Router();
-
+const checkAuth = require("../middleware/check-auth");
 const usersControllers = require("../controllers/users-controllers");
 const fileUpload = require("../middleware/file-upload");
 
@@ -23,10 +23,13 @@ route.post(
 );
 
 route.post("/login", usersControllers.login);
-route.post("/forget", usersControllers.forgetPassword);
-route.post(
-  "/reset/:token",
-  check("password").isLength({ min: 6 }),
-  usersControllers.restPassword
-);
+
+route.get("/:userId", usersControllers.getUser);
+
+route.use(checkAuth);
+
+route.patch("/:userId",
+  fileUpload.single("image"), 
+  usersControllers.updateUser);
+
 module.exports = route;

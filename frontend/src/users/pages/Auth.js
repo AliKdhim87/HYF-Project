@@ -14,7 +14,6 @@ import {
   VALIDATOR_REQUIRE
 } from "../../shared/Util/validators";
 import { AuthContext } from "../../shared/context/auth-context";
-import { Link } from "react-router-dom";
 
 const Auth = () => {
   const auth = useContext(AuthContext);
@@ -145,8 +144,6 @@ const Auth = () => {
             errorText='Please enter a valid password, at least 6 characters.'
             onInput={inputHandler}
           />
-          <Link to='/forgetpassword'>Forget password</Link>
-          <br />
           <Button type='submit' disabled={!state.isValid}>
             {isLoginMod ? "LOGIN" : "SIGNUP"}
           </Button>

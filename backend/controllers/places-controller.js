@@ -50,6 +50,145 @@ const getPlacesByUserId = async (req, res, next) => {
   }
 };
 
+const getBucketListByUserId = async (req, res, next) => {
+  const userId = req.params.uid;
+  let userWithBucketList;
+  try {
+    userWithBucketList = await User.findById(userId).populate("bucketList.id");
+    if (!userWithBucketList || userWithBucketList.bucketList.length === 0)
+      return next(
+        new HttpError(
+          "Could not find a bucket list for the provided user id.",
+          404
+        )
+      );
+
+    res.json({
+      userWithBucketList: userWithBucketList.bucketList.toObject({
+        getters: true
+      })
+    });
+  } catch (error) {
+    return next(
+      new HttpError(
+        "Something went wrong, could not find a place for the provided id.",
+        500
+      )
+    );
+  }
+};
+
+const addToBucketList = async (req, res, next) => {
+  const placeId = req.params.pid;
+  let placeForBucket;
+  try {
+    placeForBucket = await Place.findById(placeId).populate("creator");
+    if (!placeForBucket) {
+      return next(
+        new HttpError(`Could not find a place  for the provided place id.`, 404)
+      );
+    }
+  } catch (error) {
+    return next(
+      new HttpError(
+        "Something went wrong, could not find a place for the provided id.",
+        500
+      )
+    );
+  }
+  const userId = req.userData.userId;
+  let currentUser;
+  try {
+    currentUser = await User.findById(userId);
+  } catch (error) {
+    return next(
+      new HttpError(
+        "Something went wrong, could not find a user for the provided id.",
+        500
+      )
+    );
+  }
+
+  const newBucketItem = {
+    id: placeForBucket.id,
+    createdBy: placeForBucket.creator.name,
+    isVisited: false
+  };
+  const nonUniqueArray = currentUser.bucketList.filter(item => {
+    return item.id == placeForBucket.id;
+  });
+
+  const checkUnique = () => {
+    if (nonUniqueArray.length > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+  const isUnique = checkUnique();
+
+  if (!isUnique) {
+    const error = new Error("You cannot add the place with provided id", 401);
+    return next(error);
+  }
+
+  if (placeForBucket.creator != req.userData.userId && isUnique) {
+    try {
+      const sess = await mongoose.startSession();
+      sess.startTransaction();
+      currentUser.bucketList.push(newBucketItem);
+      await currentUser.save({ session: sess });
+      await sess.commitTransaction();
+    } catch (err) {
+      const error = new HttpError("Adding place failed, place try again.", 500);
+      return next(error);
+    }
+  } else {
+    const error = new Error(
+      "You cannot add your own places to you bucket list",
+      401
+    );
+    return next(error);
+  }
+  res.json({
+    addedPlace: placeForBucket
+  });
+};
+
+const deleteFromBucketList = async (req, res, next) => {
+  const placeId = req.params.pid;
+  const userId = req.userData.userId;
+  if (req.userData.userId == userId) {
+    try {
+      currentUser = await User.findById(userId);
+      await currentUser.bucketList.pull({ id: placeId });
+      await currentUser.save();
+    } catch (error) {
+      return next(new HttpError(`${error}`, 500));
+    }
+    res.status(200).json({ message: "place deleted from bucket list" });
+  } else {
+    return next(new Error("You are not authorized to delete this place", 401));
+  }
+};
+
+const visitedPlace = async (req, res, next) => {
+  const userId = req.userData.userId;
+  const placeId = req.body.placeId;
+
+  let currentUser;
+  try {
+    currentUser = await User.findById(userId);
+    const currentBucket = currentUser.bucketList;
+    const currentItem = currentBucket.find(item => item.id == placeId);
+    currentItem.isVisited = req.body.isVisited;
+    await currentUser.save();
+  } catch (error) {
+    return next(error);
+  }
+  res.send({ message: "Place visited" });
+};
+
 const createPlace = async (req, res, next) => {
   const error = validationResult(req);
   if (!error.isEmpty())
@@ -124,7 +263,6 @@ const updatePlaceById = async (req, res, next) => {
 
   try {
     const place = await Place.findById(placeId);
-
     if (!place)
       return next(
         new HttpError("Could not find a place for the provided  id.", 404)
@@ -173,103 +311,33 @@ const deletePlaceById = async (req, res, next) => {
     if (error)
       throw new HttpError("Something went wrong, could not delete image.", 500);
   });
+
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await place.remove({ session: sess });
     place.creator.places.pull(place);
-
     await place.creator.save({ session: sess });
+    await User.updateMany(
+      { "bucketList.id": placeId },
+      { $pull: { bucketList: { id: placeId } } }
+    );
     await sess.commitTransaction();
   } catch (error) {
-    return next(
-      new HttpError("Something went wrong, could not delete place.", 500)
-    );
+    return next(new HttpError(`${error}`, 500));
   }
 
   res.status(200).json({ message: "Place deleted" });
 };
 
-const likeThePlace = async (req, res, next) => {
-  const placeId = req.params.id;
-  const place = await Place.findById({ _id: placeId });
-  if (!place) {
-    return next(new HttpError("Could not like this place!", 404));
-  }
-
-  try {
-    const clicked = place.likes.includes(req.body.likes);
-    const newDisLike = place.disLike.filter(user => user !== req.body.likes);
-
-    if (clicked) {
-      const newLike = place.likes.filter(user => user !== req.body.likes);
-      place.likes = newLike;
-      place.save();
-    } else {
-      place.disLike = newDisLike;
-      place.likes = [...place.likes, req.body.likes];
-
-      place.save();
-    }
-    res.send({ place: place.toObject({ getters: true }) });
-  } catch (error) {
-    new HttpError("Something went wrong, could not like place.", 500);
-  }
-};
-
-const disLikeThePlace = async (req, res, next) => {
-  const placeId = req.params.id;
-  const place = await Place.findById({ _id: placeId });
-
-  if (!place) {
-    return next(new HttpError("Could not dislike this place!", 404));
-  }
-  try {
-    const disLiked = place.disLike.includes(req.body.disLike);
-    const newLike = place.likes.filter(user => user !== req.body.disLike);
-
-    if (disLiked) {
-      const newDisLike = place.disLike.filter(
-        user => user !== req.body.disLike
-      );
-      place.disLike = newDisLike;
-      place.save();
-    } else {
-      place.likes = newLike;
-      place.disLike = [...place.disLike, req.body.disLike];
-      place.save();
-    }
-    res.json({ place: place.toObject({ getters: true }) });
-  } catch (error) {
-    new HttpError("Something went wrong, could not dislike place.", 500);
-  }
-};
-
-const placeEvaluation = async (req, res, next) => {
-  const placeId = req.params.id;
-  try {
-    const place = await Place.findById(placeId);
-
-    if (!place)
-      return next(
-        new HttpError("Could not find a place for the provided id.", 404)
-      );
-
-    res.json({ place: place.toObject({ getters: true }) });
-  } catch (error) {
-    return next(
-      new HttpError("Somthing went wrong, could not find a place.", 500)
-    );
-  }
-};
-
 module.exports = {
+  addToBucketList,
+  getBucketListByUserId,
+  deleteFromBucketList,
+  visitedPlace,
   getPlaceById,
   getPlacesByUserId,
   createPlace,
   updatePlaceById,
-  deletePlaceById,
-  likeThePlace,
-  disLikeThePlace,
-  placeEvaluation
+  deletePlaceById
 };

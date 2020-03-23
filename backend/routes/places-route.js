@@ -6,11 +6,10 @@ const checkAuth = require("../middleware/check-auth");
 const placessControllers = require("../controllers/places-controller");
 
 route.get("/:pid", placessControllers.getPlaceById);
-
 route.get("/user/:uid", placessControllers.getPlacesByUserId);
-route.get("/evaluation/:id", placessControllers.placeEvaluation);
-
+route.get("/:uid/mybucketlist", placessControllers.getBucketListByUserId);
 route.use(checkAuth);
+route.patch("/:uid/mybucketlist/:pid/", placessControllers.addToBucketList);
 route.post(
   "/",
   fileUpload.single("image"),
@@ -36,8 +35,7 @@ route.patch(
   ],
   placessControllers.updatePlaceById
 );
-route.post("/like/:id", placessControllers.likeThePlace);
-route.post("/disLike/:id", placessControllers.disLikeThePlace);
-
+route.patch("/:uid/mybucketlist", placessControllers.visitedPlace)
 route.delete("/:pid", placessControllers.deletePlaceById);
+route.delete("/:uid/mybucketlist/:pid/", placessControllers.deleteFromBucketList)
 module.exports = route;
