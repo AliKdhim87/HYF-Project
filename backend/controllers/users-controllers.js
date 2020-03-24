@@ -99,7 +99,32 @@ const getUser = async (req, res, next) => {
   let user;
 
   try {
+
     user = await User.findById(req.params.userId, "name image");
+
+
+    if (!user) {
+      return next(
+        new HttpError(
+          `The email address ${req.body.email} is not associated with any account. Double-check your email address and try again.`,
+          401
+        )
+      );
+    }
+
+    //Generate and set password reset token
+    user.generatePasswordReset();
+    user.save()
+
+    // Save the updated user object
+    // send email
+    let link = req.headers.origin + "/resetpassword/" + user.resetPasswordToken;
+
+    frogetPasswordEmail(user.name, user.email, link);
+    res.status(200).json({
+      message: "A reset email has been sent to " + user.email + "."
+    });
+
   } catch (error) {
     return next(
       new HttpError("Fetching user failed, please try again later.", 500)
