@@ -42,6 +42,6 @@ const useHttpClient = () => {
       activeHttpRequests.current.forEach(abortCtrl => abortCtrl.abort());
     };
   }, []);
-  return { isLoading, error, sendRequest, clearError, setIsLoading };
+  return { isLoading, error, sendRequest, clearError };
 };
 export default useHttpClient;

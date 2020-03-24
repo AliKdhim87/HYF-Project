@@ -51,7 +51,7 @@ const signup = async (req, res, next) => {
     await createdUser.save();
   } catch (error) {
     return next(
-      new HttpError("Signin up  failed, please try again later.", 500)
+      new HttpError(`${error}`, 500)
     );
   }
   let token;
@@ -95,4 +95,77 @@ const login = async (req, res, next) => {
     .json({ userId: existingUser.id, email: existingUser.email, token });
 };
 
-module.exports = { getUsers, signup, login };
+const getUser = async (req, res, next) => {
+  let user;
+
+  try {
+
+    if (!user) {
+      return next(
+        new HttpError(
+          `The email address ${req.body.email} is not associated with any account. Double-check your email address and try again.`,
+          401
+        )
+      );
+    }
+
+    //Generate and set password reset token
+    user.generatePasswordReset();
+    user.save()
+
+    // Save the updated user object
+    // send email
+    let link = req.headers.origin + "/resetpassword/" + user.resetPasswordToken;
+
+    frogetPasswordEmail(user.name, user.email, link);
+    res.status(200).json({
+      message: "A reset email has been sent to " + user.email + "."
+    });
+  } catch (error) {
+    return next(
+      new HttpError("Fetching user failed, please try again later.", 500)
+    );
+
+  }
+  res
+    .status(200)
+    .json({ user: user.toObject({ getters: true })});
+};
+
+const updateUser = async (req, res, next) => {
+  let user;
+  let url;
+
+  if(req.params.userId !== req.userData.userId){
+    return next(
+      new HttpError("Not authorized.", 401)
+    );
+  }
+
+  if(req.file){
+    try{
+      const result = await cloudinary.uploader.upload(req.file.path);
+      url = result.url;
+    } catch {
+      return next(
+        new HttpError("Updating user failed, please try again later.", 500)
+      );
+    }
+  }
+
+  try {
+    user = await User.findById(req.params.userId);
+    user.name = req.body.name || user.name;
+    user.image = url || user.image;
+    await user.save();
+  } catch {
+    return next(
+      new HttpError("Updating user failed, please try again later.", 500)
+    );
+  }
+  res
+    .status(200)
+    .json({ user: {name: user.name, image: user.image}});
+};
+
+module.exports = { getUsers, signup, login, getUser, updateUser };

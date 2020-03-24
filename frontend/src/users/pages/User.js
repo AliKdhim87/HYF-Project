@@ -1,24 +1,25 @@
-import React, { useEffect, useState, Fragment } from "react";
-import UsersList from "../components/UsersList";
+import React, { useEffect, useState, useContext, Fragment } from "react";
 import ErrorModal from "../../shared/component/UIElements/ErrorModal";
 import LoadingSpinner from "../../shared/component/UIElements/LoadingSpinner";
 import useHttpClient from "../../shared/hooks/http-hook";
-const Users = () => {
-  const [users, setUsers] = useState();
+import { AuthContext } from "../../shared/context/auth-context";
+import UserProfile from '../components/UserProfile';
+const User = () => {
+  const {userId} = useContext(AuthContext);
+  const [user, setUser] = useState();
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
   useEffect(() => {
-    const getUsers = async () => {
+    const getUser = async () => {
       try {
         const data = await sendRequest(
-          `${process.env.REACT_APP_BACKEND_URL}/users`
+          `${process.env.REACT_APP_BACKEND_URL}/users/${userId}`
         );
-
-        setUsers(data.users);
-      } catch (error) {}
+        setUser(data.user);
+      } catch{}
     };
-    getUsers();
-  }, [sendRequest]);
+    getUser();
+  }, [sendRequest, userId]);
 
   return (
     <Fragment>
@@ -28,9 +29,9 @@ const Users = () => {
           <LoadingSpinner />
         </div>
       )}
-      {!isLoading && users && <UsersList items={users} />}
+      {!isLoading && user && <UserProfile user={user} setUser={setUser}/>}
     </Fragment>
   );
 };
 
-export default Users;
+export default User;
