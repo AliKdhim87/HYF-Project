@@ -9,8 +9,8 @@ import MainNavigation from "./shared/component/Navigation/MainNavigation";
 import { AuthContext } from "./shared/context/auth-context";
 import { useAuth } from "./shared/hooks/auth-hook";
 import LoadingSpinner from "./shared/component/UIElements/LoadingSpinner";
-import ForgetPassword from "./users/components/ForgetPassword";
-import ResetEmail from "./users/components/ResetEmail"
+const ForgetPassword = React.lazy(() =>import("./users/components/ForgetPassword"));
+const ResetEmail = React.lazy(() =>import("./users/components/ResetEmail"));
 const BucketList = React.lazy(() => import("./places/components/BucketList"));
 const Users = React.lazy(() => import("./users/pages/Users"));
 const NewPlace = React.lazy(() => import("./places/pages/NewPlace"));
@@ -53,9 +53,9 @@ const App = () => {
           <Users />
         </Route>
         <Route path="/forget">
-          <ForgetPassword/>
+          <ForgetPassword />
         </Route>
-        <Route path='/resetpassword/:token'>
+        <Route path="/resetpassword/:token">
           <ResetEmail />
         </Route>
         <Route path="/:userId/places" exact>

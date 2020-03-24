@@ -103,19 +103,19 @@ const Auth = () => {
   return (
     <Fragment>
       <ErrorModal error={error} onClear={clearError} />
-      <Card className='authentication'>
+      <Card className="authentication">
         {isLoading && <LoadingSpinner asOverlay />}
         <h2>Login Required</h2>
         <hr />
-        <form className='place-form' onSubmit={authSubmitHandler}>
+        <form className="place-form" onSubmit={authSubmitHandler}>
           {!isLoginMod && (
             <Input
-              id='name'
-              element='input'
-              type='text'
-              label='Your Name'
+              id="name"
+              element="input"
+              type="text"
+              label="Your Name"
               validators={[VALIDATOR_REQUIRE()]}
-              errorText='Please enter a valid name'
+              errorText="Please enter a valid name"
               onInput={inputHandler}
             />
           )}
@@ -124,33 +124,34 @@ const Auth = () => {
               center
               id={"image"}
               onInput={inputHandler}
-              errorText='Please provide an image'
+              errorText="Please provide an image"
             />
           )}
           <Input
-            id='email'
-            element='input'
-            type='email'
-            label='Email'
+            id="email"
+            element="input"
+            type="email"
+            label="Email"
             validators={[VALIDATOR_EMAIL()]}
-            errorText='Please enter a valid email address'
+            errorText="Please enter a valid email address"
             onInput={inputHandler}
           />
           <Input
-            id='password'
-            element='input'
-            type='password'
-            label='Password'
+            id="password"
+            element="input"
+            type="password"
+            label="Password"
             validators={[VALIDATOR_MINLENGTH(6)]}
-            errorText='Please enter a valid password, at least 6 characters.'
+            errorText="Please enter a valid password, at least 6 characters."
             onInput={inputHandler}
           />
-          <Button type='submit' disabled={!state.isValid}>
+          <Button type="submit" disabled={!state.isValid}>
             {isLoginMod ? "LOGIN" : "SIGNUP"}
           </Button>
-          <Button>
-            <Link to="/forget">FORGOT PASSWORD</Link>
-          </Button>
+          <Link to="/forget">
+            {" "}
+            <Button>FORGOT PASSWORD </Button>
+          </Link>
         </form>
         <Button inverse onClick={switchModelHandler}>
           SWITHC TO {isLoginMod ? "SIGNUP" : "LOGIN"}
