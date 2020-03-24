@@ -6,7 +6,12 @@ const usersControllers = require("../controllers/users-controllers");
 const fileUpload = require("../middleware/file-upload");
 
 route.get("/", usersControllers.getUsers);
-
+route.post("/forget", usersControllers.forgetPassword)
+route.post(
+  "/reset/:token",
+  check("password").isLength({ min: 6 }),
+  usersControllers.restPassword
+);
 route.post(
   "/signup",
   fileUpload.single("image"),
